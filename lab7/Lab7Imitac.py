@@ -41,15 +41,13 @@ class LiveGraph(QMainWindow):
         averageTime = random.randint(1,8)
         averageDifficulty = random.randint(1,5)
         
-    
- #       averagePrice = 450*averageTime + materialPrice * (1 +  averageTime/8) * (1 + averageDifficulty/5) ##
         averagePrice = (materialPrice + (averageTime*averageDifficulty*450))*(1+self.lastPopularity*2)
-        popularity = ((self.lastPrice - averagePrice)/averagePrice + self.lastAdv/self.population + random.randint(1, 100)/100) % 1
-        
+        popularity = ((self.lastPrice - averagePrice)/averagePrice + self.lastAdv/self.population + random.randint(1, 100)/100)
+        # popularity зависить от lastPrice, averagePrice, lastAdv, акций (randint), lastPopularity
         
         clients = self.population * popularity
         workers = 1
-        haircuts = int((clients * 1.5) % ((8 / averageTime)*22*workers))
+        haircuts = int((clients * 1.5) // ((8 / averageTime)*22*workers)) #Artyom super smart
         revenue = haircuts * averagePrice
         
         paychecks = 156.25 * haircuts * averageTime + 20000
@@ -67,7 +65,8 @@ class LiveGraph(QMainWindow):
         print("profit ", profits)
         print("popularity ", popularity)
         self.lastProfits = profits 
-
+        self.lastPopularity = popularity
+        self.lastPrice = averagePrice 
         return profits
 
 
