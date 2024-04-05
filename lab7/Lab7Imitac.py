@@ -12,6 +12,7 @@ class LiveGraph(QMainWindow):
     lastPrice = 500
     lastAdv = 1
     lastProfits = 0
+    lastPopularity = 0
     equipmentStart = 100000
     def __init__(self):
         super().__init__()
@@ -36,20 +37,24 @@ class LiveGraph(QMainWindow):
 
     def tick(self):
         
-        materialPrice = random.randint(50,100)
+        materialPrice = random.randint(150,600)
         averageTime = random.randint(1,8)
         averageDifficulty = random.randint(1,5)
+        
     
-        averagePrice = 450*averageTime + materialPrice * (1 +  averageTime/8) * (1 + averageDifficulty/5) ##
-        popularity = ((self.lastPrice - averagePrice)/averagePrice + self.lastAdv/self.population) % 1
+ #       averagePrice = 450*averageTime + materialPrice * (1 +  averageTime/8) * (1 + averageDifficulty/5) ##
+        averagePrice = (materialPrice + (averageTime*averageDifficulty*450))*(1+self.lastPopularity*2)
+        popularity = ((self.lastPrice - averagePrice)/averagePrice + self.lastAdv/self.population + random.randint(1, 100)/100) % 1
+        
+        
         clients = self.population * popularity
         workers = 1
         haircuts = int((clients * 1.5) % ((8 / averageTime)*22*workers))
         revenue = haircuts * averagePrice
         
         paychecks = 156.25 * haircuts * averageTime + 20000
-        equipmentMaintenance = self.equipmentStart * (1/12)
-        taxes = revenue * 0.13
+        equipmentMaintenance = self.equipmentStart * (1/(12*3))
+        taxes = revenue * 0.30
         self.lastAdv = 0.05 * self.lastProfits
                
 
