@@ -33,7 +33,7 @@ class LiveGraph(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        self.timer = self.startTimer(100)  # Обновление каждую секунду
+        self.timer = self.startTimer(100)  # Обновление в милисекундах
 
     def tick(self):
         
@@ -43,13 +43,11 @@ class LiveGraph(QMainWindow):
         promotions = 1 + random.randint(1, 20)/100
         
         averagePrice = (materialPrice + (np.log10(averageTime*averageDifficulty)*650))*(1+self.lastPopularity)
-        # popularity зависить от lastPrice, averagePrice, lastAdv, акций (randint), lastPopularity
-        #popularity = self.lastPopularity * (self.lastPrice / (averagePrice - np.sqrt(self.lastAdv) * promotions))
         popularity = self.lastPopularity * (self.lastPrice / (averagePrice - np.sqrt(self.lastAdv) * promotions)) - np.square(self.lastPopularity)*0.25
         if popularity < 0.001: popularity = 0.001
         clients = self.population * np.sqrt(popularity) // 12
         workers = 2
-        haircuts = (clients * (1+np.log2(workers))) // ((8 / averageTime)*22) #Artyom super smart
+        haircuts = (clients * (1+np.log2(workers))) // ((8 / averageTime)*22)
         revenue = haircuts * averagePrice
         
         paychecks = (15.25 * haircuts * averageTime + 20000)
