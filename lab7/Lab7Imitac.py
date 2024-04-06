@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-y = [random.randint(0, 10) for _ in range(1)]
+y = []
 class LiveGraph(QMainWindow):
     population = 200000
     lastPrice = 500
     lastAdv = 1
     lastProfits = 0
-    lastPopularity = 0
+    lastPopularity = 0.01
     equipmentStart = 100000
     def __init__(self):
         super().__init__()
@@ -33,31 +33,37 @@ class LiveGraph(QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        self.timer = self.startTimer(1000)  # Обновление каждую секунду
+        self.timer = self.startTimer(100)  # Обновление каждую секунду
 
     def tick(self):
         
         materialPrice = random.randint(150,600)
-        averageTime = random.randint(1,8)
-        averageDifficulty = random.randint(1,5)
+        averageTime = 1 + np.random.binomial(7, 0.5)
+        averageDifficulty = 1 + np.random.binomial(4, 0.5)
+        promotions = 1 + random.randint(1, 20)/100
         
-        averagePrice = (materialPrice + (averageTime*averageDifficulty*450))*(1+self.lastPopularity*2)
-        popularity = ((self.lastPrice - averagePrice)/averagePrice + self.lastAdv/self.population + random.randint(1, 100)/100)
+        averagePrice = (materialPrice + (np.log10(averageTime*averageDifficulty)*650))*(1+self.lastPopularity)
         # popularity зависить от lastPrice, averagePrice, lastAdv, акций (randint), lastPopularity
-        
-        clients = self.population * popularity
-        workers = 1
-        haircuts = int((clients * 1.5) // ((8 / averageTime)*22*workers)) #Artyom super smart
+        #popularity = self.lastPopularity * (self.lastPrice / (averagePrice - np.sqrt(self.lastAdv) * promotions))
+        popularity = self.lastPopularity * (self.lastPrice / (averagePrice - np.sqrt(self.lastAdv) * promotions)) - np.square(self.lastPopularity)*0.25
+        if popularity < 0.001: popularity = 0.001
+        clients = self.population * np.sqrt(popularity) // 12
+        workers = 2
+        haircuts = (clients * (1+np.log2(workers))) // ((8 / averageTime)*22) #Artyom super smart
         revenue = haircuts * averagePrice
         
-        paychecks = 156.25 * haircuts * averageTime + 20000
+        paychecks = (15.25 * haircuts * averageTime + 20000)
         equipmentMaintenance = self.equipmentStart * (1/(12*3))
         taxes = revenue * 0.30
-        self.lastAdv = 0.05 * self.lastProfits
+        if self.lastProfits > 0:    
+            self.lastAdv = 1000 + 0.05 * self.lastProfits
+        else:
+            self.lastAdv = 1000
                
 
         profits = revenue - paychecks - self.equipmentStart - equipmentMaintenance - self.lastAdv - taxes
         print("")
+        print("clients ", clients)
         print("avg price ", averagePrice)
         print("N ", haircuts)
         print("Revenue ", revenue)
